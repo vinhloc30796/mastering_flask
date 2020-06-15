@@ -1,9 +1,12 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import func, text
 from config import DevConfig
 import datetime
+from flask_wtf import FlaskForm as Form
+from wtforms import StringField, TextAreaField
+from wtforms.validators import DataRequired, Length
 
 app = Flask(__name__)
 app.config.from_object(DevConfig)
@@ -91,6 +94,14 @@ class Comment(db.Model):
         return f"<Comment: {self.text[:15]}...>"
 
 
+class CommentForm(Form):
+    name = StringField(
+        'Name',
+        validators=[DataRequired(), Length(max=255)]
+    )
+    text = TextAreaField(u'Comment', validators=[DataRequired()])
+
+
 def sidebar_data():
     recent = Post.query.order_by(
         Post.publish_date.desc()
@@ -120,9 +131,38 @@ def home(page=1):
     )
 
 
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=('GET', 'POST'))
 def post(post_id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        new_comment = Comment()
+        new_comment.name = form.name.data
+        new_comment.text = form.text.data
+        new_comment.post_id = post_id
+        try:
+            db.session.add(new_comment)
+            db.session.commit()
+        except Exception as e:
+            flash(f'Error adding your comment: {str(e)}')
+            db.session.rollback()
+        else:
+            flash('Comment added', 'info')
+        return redirect(url_for('post', post_id=post_id))
+
     post = Post.query.get_or_404(post_id)
+    tags = post.tags
+    comments = post.comments.order_by(Comment.date.desc()).all()
+    recent, top_tags = sidebar_data()
+
+    return render_template(
+        'post.html',
+        post=post,
+        tags=tags,
+        comments=comments,
+        recent=recent,
+        top_tags=top_tags,
+        form=form
+    )
 
 
 @app.route('/posts_by_tag/<string:tag_name>')
@@ -130,7 +170,7 @@ def posts_by_tag(tag_name):
     pass
 
 
-@app.route('/posts_by_user/<int:username>')
+@app.route('/posts_by_user/<string:username>')
 def posts_by_user(username):
     user = User.query.filter_by(username=username).first_or_404()
     posts = user.posts.order_by(Post.publish_date.desc()).all()
