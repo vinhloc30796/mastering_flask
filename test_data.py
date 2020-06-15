@@ -48,7 +48,8 @@ def generate_posts(n, users, tags):
         post = Post()
         post.title = faker.sentence()
         post.text = faker.text(max_nb_chars=1000)
-        post.publish_date = faker.date_this_century(before_today=True, after_today=False)
+        post.publish_date = faker.date_this_century(
+            before_today=True, after_today=False)
         post.user_id = users[random.randrange(0, len(users))].id
         post.tags = [tags[random.randrange(0, len(tags))] for i in range(0, 2)]
         try:
@@ -57,5 +58,6 @@ def generate_posts(n, users, tags):
         except Exception as e:
             log.error("Fail to add post %s: %s" % (str(post), e))
             db.session.rollback()
+
 
 generate_posts(100, generate_users(10), generate_tags(5))
