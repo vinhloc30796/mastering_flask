@@ -9,6 +9,7 @@ secrets.txt
 ./tmp
 ./build/*
 .idea/*
+./__pycache__/*
 .idea
 env
 venv
