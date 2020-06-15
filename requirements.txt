@@ -4,5 +4,7 @@ itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
 Werkzeug==0.14.1
-flask-sqlalchemy
-Flask-Migrate
+Flask-SQLAlchemy==2.3.2
+Flask-Migrate==2.1.1
+Flask-WTF==0.14.2
+Faker==0.8.13
