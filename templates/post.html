@@ -9,7 +9,7 @@
     </div>
     <div class="row shadow-sm">
         <div class="col-lg-6">
-            <p>Written By <a href="{{ url_for('posts_by_user', username=post.user.username) }}">{{ post.user.username }}</a> on {{ post.publish_date }}</p>
+            <p>Written By <a href="{{ url_for('posts_by_user', username=post.users.username) }}">{{ post.users.username }}</a> on {{ post.publish_date }}</p>
         </div>
         <div class="col-lg-6">
             <p class="text-right"> Tags: {% for tag in tags %}
